@@ -1,0 +1,44 @@
+name: BPB-构建和部署 Worker
+# name: Build and Deploy Worker
+
+on:
+  push:
+#    branches: # 分支更新运行
+#      - main
+    paths:
+      - 'BPB/**' # 仅当 src 文件夹下的文件发生变化时触发
+  workflow_dispatch: # 允许手动触发工作流
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "latest"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: |
+          npx wrangler deploy BPB/worker.js --name bpb-worker-panel --compatibility-flag [nodejs_compat] --compatibility-date 2024-10-26 --dry-run --outdir=dist
+          npx javascript-obfuscator --split-strings true --split-strings-chunk-length 2 dist/worker.js --output _worker_BPB.js.js
+
+      - name: Commit and push built worker
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add _worker_BPB.js.js
+          git commit -m "Automated build: update _worker_BPB.js.js"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
