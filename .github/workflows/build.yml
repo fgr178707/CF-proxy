@@ -6,7 +6,7 @@ on:
 #    branches: # 分支更新运行
 #      - main
     paths:
-      - 'BPB/**' # 仅当 src 文件夹下的文件发生变化时触发
+      - 'BPB/src/**' # 仅当 src 文件夹下的文件发生变化时触发
   workflow_dispatch: # 允许手动触发工作流
 
 permissions:
@@ -34,17 +34,14 @@ jobs:
           npx javascript-obfuscator dist/worker.js --output _worker_BPB.js \
             --compact true \
             --control-flow-flattening true \
-            --control-flow-flattening-threshold 0.5 \
+            --control-flow-flattening-threshold 0.2 \
             --identifier-names-generator hexadecimal \
-            --dead-code-injection true \
-            --dead-code-injection-threshold 1 \
             --rename-globals true \
             --string-array true \
             --string-array-encoding 'rc4' \
-            --string-array-threshold 0.5 \
+            --string-array-threshold 0.3 \
             --transform-object-keys true \
-            --unicode-escape-sequence true \
-            --numbers-to-expressions true 
+            --unicode-escape-sequence true
 
       - name: Commit and push built worker
         run: |
